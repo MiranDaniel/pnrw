@@ -8,6 +8,8 @@
 ![badge](https://img.shields.io/pypi/dm/pnrw?style=for-the-badge)
 ![badge](https://img.shields.io/pypi/pyversions/pnrw?style=for-the-badge)
 
+---
+
 ## Documentation
 
 PNRW uses the same variable and function names as the RPC Protocol, this means that you can use the official documentation for this library.
@@ -15,9 +17,9 @@ PNRW uses the same variable and function names as the RPC Protocol, this means t
 (There are some differences, please check the difference guide below)
 
 ---
-<!-- markdownlint-disable -->
+
 ### pnrw.**Node**
-<!-- markdownlint-restore -->
+
 *The node class handles all node connections.*
 
 ```py
@@ -38,9 +40,10 @@ node = pnrw.Node("nodeIp") # Create a new node instance
 
 `headers` (dict): Custom headers that are sent with each request, default value is "Default"
 
+---
 
 ## Examples
-
+<!-- markdownlint-disable -->
 #### Starting code
 
 ```py
@@ -60,7 +63,7 @@ print(node.block_count()) # Check node block count
 print(node.version()["protocol_version"]) # Print protocol version of node
 print(node.uptime()) # Print node uptime in seconds
 ```
-
+<!-- markdownlint-restore -->
 #### Showing current account balance
 
 ```py
@@ -88,7 +91,6 @@ Changed to: `sign_private()` & `sign_acount()` & `sign_block_hash()`
 
 Use `sign_private()` when signing a block with a private key, `sign_account()` when signing a block with an account from wallet and `sign_block_hash()` when signing a block hash.
 
----
 
 ## Donations
 
