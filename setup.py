@@ -1,19 +1,28 @@
 from setuptools import setup
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(
     name='pnrw',
-    version='0.1.0',    
+    version='0.1.1',
     description='Python Nanocurrency RPC Wrapper',
-    author='mirandaniel',
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/MiranDaniel/pnrw",
+    author='MiranDaniel',
     author_email='mirandaniel@protonmail.com',
-    license='BSD 2-clause',
+    license='License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
     packages=['pnrw'],
     install_requires=[],
 
     classifiers=[
-        'Development Status :: 1 - Planning',
         'Environment :: Console',
-        'Operating System :: POSIX :: Linux',
-        'Programming Language :: Python :: 3.7'
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 3'
     ],
+    desctiption=(
+        "PNRW is a Python wrapper for the Nanocurrency RPC protocol"
+    ),
+    python_requires='>=3.6'
 )

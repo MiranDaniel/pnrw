@@ -12,7 +12,7 @@
 
 ## Installation
 
-**PNRW can be installed using PyPI**
+### PNRW can be installed using PyPI
 
 ```shell
 pip install pnrw
