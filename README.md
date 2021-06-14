@@ -10,6 +10,24 @@
 
 ---
 
+## Installation
+
+**PNRW can be installed using PyPI**
+
+```shell
+pip install pnrw
+```
+
+---
+
+Looking to install from source code?
+
+```shell
+pip install .
+```
+
+---
+
 ## Documentation
 
 PNRW uses the same variable and function names as the RPC Protocol, this means that you can use the official documentation for this library.
@@ -76,6 +94,7 @@ myBalance = node.rai_from_raw(balance["balance"]) # Convert from raw to Nano
 
 print(f"I currently have {myBalance} Nano!")
 ```
+
 ---
 
 ## Differences from official commands
