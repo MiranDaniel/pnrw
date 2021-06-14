@@ -1,4 +1,5 @@
 """
+
     Copyright (C) 2021 MiranDaniel
 
     This program is free software: you can redistribute it and/or modify
@@ -13,10 +14,13 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 
 import requests
 import json
+from .exceptions import *
+
 
 def _validate_ip(s):
     a = s.split('.')
@@ -31,6 +35,24 @@ def _validate_ip(s):
             return False
     return True
 
+
+def _validate_address(s):
+    if s.startswith("nano_") == False and s.startswith("ban_") == False:
+        raise AddressInvalid(s)
+    else:
+        if s.startswith("nano_"):
+            if len(s) != 65:
+                raise AddressInvalid(s)
+        elif s.startswith("ban_"):
+            if len(s) != 64:
+                raise AddressInvalid(s)
+
+
+def _validate_block(s):
+    if len(s) != 64:
+        raise BlockInvalid(s)
+
+
 class Node:
     def __init__(self, ip, port=7076, dontUseHTTPS=False, headers="Default"):
         self.ip = ip
@@ -40,13 +62,20 @@ class Node:
             self.target = f"http{self.secure}://{self.ip}:{self.port}"
         else:
             self.target = f"http{self.secure}://{self.ip}"
-        if headers != "Default":
-            self.headers = {'Content-type': 'application/json', 'Accept': '*/*',"Accept-Encoding":"gzip, deflate, br","Connection":"keep-alive"}
+        if headers == "Default":
+            self.headers = {'Content-type': 'application/json', 'Accept': '*/*',
+                            "Accept-Encoding": "gzip, deflate, br", "Connection": "keep-alive"}
         else:
             self.headers = headers
 
     def _request(self, data):
-        response = requests.post(self.target, data=json.dumps(data), headers=self.headers).text
+        if "account" in data:
+            _validate_address(data["account"])
+        if "block" in data:
+            _validate_block(data["block"])
+
+        response = requests.post(self.target, data=json.dumps(
+            data), headers=self.headers).text
         return json.loads(response)
 
     def account_balance(self, account):
@@ -310,7 +339,7 @@ class Node:
 
     def deterministic_key(self, seed, index):
         response = self._request(
-            {"action": "deterministic_key", "seed":seed,"index":index})
+            {"action": "deterministic_key", "seed": seed, "index": index})
         return response
 
     def epoch_upgrade(self, epoch, key):
@@ -322,8 +351,9 @@ class Node:
         response = self._request({"action": "frontier_count"})
         return int(response["count"])
 
-    def frontiers(self,account,count):
-        response = self._request({"action": "frontiers","account":account,"count":count})
+    def frontiers(self, account, count):
+        response = self._request(
+            {"action": "frontiers", "account": account, "count": count})
         return response["frontiers"]
 
     def keepalive(self, address, port):
@@ -340,7 +370,8 @@ class Node:
         return response
 
     def ledger(self, account, count):
-        response = self._request({"action": "ledger", "account":account,"count":count})
+        response = self._request(
+            {"action": "ledger", "account": account, "count": count})
         ret = {}
         for i in response["accounts"]:
             ret[i] = {
@@ -378,7 +409,8 @@ class Node:
         return int(response["exists"])
 
     def process(self, json_block, subtype, block):
-        response = self._request({"action": "process", "json_block":json_block,"subtype":subtype, "block":block})
+        response = self._request(
+            {"action": "process", "json_block": json_block, "subtype": subtype, "block": block})
         return response["hash"]
 
     def representatives(self):
