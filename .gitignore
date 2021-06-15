@@ -117,3 +117,4 @@ dmypy.json
 test.py
 testy.py
 .vscode
+.VSCodeCounter

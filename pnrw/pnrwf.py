@@ -538,7 +538,13 @@ class Node:
 
     # unchecked_get
     # unchecked_keys
-    # unopened
+
+    def unopened(self, account, count):
+        response = self._request({"action": "unopened","account":account,"count":count})
+        ret = {}
+        for i in response["accounts"]:
+            ret[i] = int(response["accounts"][i])
+        return ret
 
     def uptime(self):
         response = self._request({"action": "uptime"})
@@ -548,7 +554,14 @@ class Node:
         response = self._request({"action": "work_cancel", "hash": Hash})
         return response
 
-    # work_generate
+    def work_generate(self, Hash):
+        response = self._request({"action": "work_generate", "hash": Hash})
+        return {
+            "work": response["work"],
+            "difficulty": response["difficulty"],
+            "multiplier": float(response["multiplier"]),
+            "hash": response["hash"]
+        }
 
     def work_peer_add(self, address, port):
         response = self._request(
@@ -563,7 +576,14 @@ class Node:
         response = self._request({"action": "work_peer_add"})
         return response["success"]
 
-    # work validate
+    def work_validate(self, work, Hash):
+        response = self._request({"action": "work_validate","work":work,"hash":Hash})
+        return {
+            "valid_all": int(response["valid_all"]),
+            "valid_receive": int(response["valid_receive"]),
+            "difficulty": response["difficulty"],
+            "multiplier": float(response["multiplier"])
+        }
 
     def account_create(self, wallet):
         response = self._request(
@@ -686,7 +706,10 @@ class Node:
             {"action": "wallet_destroy", "wallet": wallet})
         return int(response["destroyed"])
 
-    # wallet_export
+    def wallet_export(self, wallet):
+        response = self._request(
+            {"action": "wallet_export", "wallet": wallet})
+        return json.loads(response["json"])
 
     def wallet_frontiers(self, wallet):
         response = self._request(
