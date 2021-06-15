@@ -37,10 +37,13 @@ def _validate_ip(s):
 
 
 def _validate_address(s):
-    if s.startswith("nano_") == False and s.startswith("ban_") == False:
+    if s.startswith("nano_") == False and s.startswith("ban_") == False and s.startswith("xrb_") == False:
         raise AddressInvalid(s)
     else:
         if s.startswith("nano_"):
+            if len(s) != 65:
+                raise AddressInvalid(s)
+        if s.startswith("xrb_"):
             if len(s) != 65:
                 raise AddressInvalid(s)
         elif s.startswith("ban_"):
@@ -76,6 +79,8 @@ class Node:
         if headers == "Default":
             self.headers = {'Content-type': 'application/json', 'Accept': '*/*',
                             "Accept-Encoding": "gzip, deflate, br", "Connection": "keep-alive"}
+            if banano:
+                self.headers = {'Content-type': 'application/json', "Connection": "keep-alive"}
         else:
             self.headers = headers
 

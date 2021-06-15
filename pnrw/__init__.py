@@ -1,3 +1,4 @@
-from .pnrwf import Node as N
+from .pnrwf import Node
+
+from . import convert
 from . import exceptions
-Node = N
