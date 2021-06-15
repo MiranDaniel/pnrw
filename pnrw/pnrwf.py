@@ -54,10 +54,11 @@ def _validate_block(s):
 
 
 class Node:
-    def __init__(self, ip, port=7076, dontUseHTTPS=False, headers="Default"):
+    def __init__(self, ip, port=7076, dontUseHTTPS=False, headers="Default", banano=False):
         self.ip = ip
         self.port = port
         self.secure = "s" if dontUseHTTPS == False else ""
+        self.banano = banano
         if _validate_ip(self.ip) == True:
             self.target = f"http{self.secure}://{self.ip}:{self.port}"
         else:
@@ -73,10 +74,25 @@ class Node:
             _validate_address(data["account"])
         if "block" in data:
             _validate_block(data["block"])
+        try:
+            response = requests.post(self.target, data=json.dumps(
+                data), headers=self.headers).text
+            print(response)
+        except requests.exceptions.ConnectionError:
+            raise CannotConnect()
+        if response.startswith("<!DOCTYPE html>"):
+            raise InvalidServerResponseHTML()
+        jsload = json.loads(response)
+        if "message" in jsload:
+            if jsload["message"] == "Action is not supported":
+                raise ActionNotSupported()
+        if "error" in jsload:
+            if jsload["error"] == "Wallet not found":
+                raise WalletNotFound()
+            if jsload["error"] == "Invalid block hash":
+                raise InvalidBlockHash()
 
-        response = requests.post(self.target, data=json.dumps(
-            data), headers=self.headers).text
-        return json.loads(response)
+        return jsload
 
     def account_balance(self, account):
         response = self._request(
