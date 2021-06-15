@@ -54,14 +54,25 @@ def _validate_block(s):
 
 
 class Node:
-    def __init__(self, ip, port=7076, dontUseHTTPS=False, headers="Default"):
-        self.ip = ip
-        self.port = port
-        self.secure = "s" if dontUseHTTPS == False else ""
-        if _validate_ip(self.ip) == True:
-            self.target = f"http{self.secure}://{self.ip}:{self.port}"
+    def __init__(self, ip, port="Default", dontUseHTTPS=False, headers="Default", banano=False):
+        self.ip = ip.lower().replace("https", "").replace("http", "")
+        self.secure = "https" if dontUseHTTPS == False else "http"
+
+        if port == "Default":
+            if banano == False:
+                self.port = 7076
+            else:
+                self.port = 7072
         else:
-            self.target = f"http{self.secure}://{self.ip}"
+            self.port = port
+
+        self.banano = banano
+
+        if _validate_ip(self.ip) == True:
+            self.target = f"{self.secure}://{self.ip}:{self.port}"
+        else:
+            self.target = f"{self.secure}://{self.ip}"
+
         if headers == "Default":
             self.headers = {'Content-type': 'application/json', 'Accept': '*/*',
                             "Accept-Encoding": "gzip, deflate, br", "Connection": "keep-alive"}
@@ -73,10 +84,34 @@ class Node:
             _validate_address(data["account"])
         if "block" in data:
             _validate_block(data["block"])
+        try:
+            response = requests.post(self.target, data=json.dumps(
+                data), headers=self.headers).text
+        except requests.exceptions.ConnectionError:
+            raise CannotConnect()
+        if response.startswith("<!DOCTYPE html>"):
+            raise InvalidServerResponseHTML()
+        jsload = json.loads(response)
+        if "message" in jsload:
+            if jsload["message"] == "Action is not supported":
+                raise ActionNotSupported()
+        if "error" in jsload:
+            if jsload["error"] == "Wallet not found":
+                raise WalletNotFound()
+            elif jsload["error"] == "Invalid block hash":
+                raise InvalidBlockHash()
+            elif jsload["error"] == "Unknown error":
+                raise UnknownError()
+            elif jsload["error"] == "RPC control is disabled":
+                raise RPCdisabled()
+            elif jsload["error"] == "Invalid balance number":
+                raise InvalidBalanceNumber()
+            elif jsload["error"] == "Empty response":
+                raise EmptyResponse()
+            else:
+                raise UnknownError()
 
-        response = requests.post(self.target, data=json.dumps(
-            data), headers=self.headers).text
-        return json.loads(response)
+        return jsload
 
     def account_balance(self, account):
         response = self._request(

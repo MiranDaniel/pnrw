@@ -58,6 +58,8 @@ node = pnrw.Node("nodeIp") # Create a new node instance
 
 `headers` (dict): Custom headers that are sent with each request, default value is "Default"
 
+`banano` (bool): Ensures correct configuration when using PNRW for Banano, default is False
+
 ---
 
 ## Examples
