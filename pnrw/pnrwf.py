@@ -16,6 +16,13 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
+"""
+Love PNRW?
+
+Nano: nano_396phmigwi883hk4x3teedtjk1ejskckmqe7xz3ymfnhe58p9o8gzmkygx91
+Banano: ban_1aws637mb3qnuf9j8swzufq3nj3fttuzkixbd817nmmhyms6a6kt1zyptq87
+"""
+
 
 import requests
 import json
