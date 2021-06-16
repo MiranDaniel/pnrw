@@ -80,7 +80,8 @@ class Node:
             self.headers = {'Content-type': 'application/json', 'Accept': '*/*',
                             "Accept-Encoding": "gzip, deflate, br", "Connection": "keep-alive"}
             if banano:
-                self.headers = {'Content-type': 'application/json', "Connection": "keep-alive"}
+                self.headers = {
+                    'Content-type': 'application/json', "Connection": "keep-alive"}
         else:
             self.headers = headers
 
@@ -275,8 +276,15 @@ class Node:
             "subtype": response["subtype"],
         }
 
-    # blocks
-    # blocks_info
+    def blocks_info(self, json_block, hashes):
+        response = self._request(
+            {"action": "blocks_info", "json_block": json_block, "hashes": hashes})
+        return response["blocks"]
+
+    def blocks(self, json_block, hashes):
+        response = self._request(
+            {"action": "blocks", "json_block": json_block, "hashes": hashes})
+        return response["blocks"]
 
     def bootstrap(self, address, port):
         response = self._request(
@@ -310,7 +318,7 @@ class Node:
             "attempts": []
         }
         for i in response["attempts"]:
-            ret["attempts"].append(i)  # WORK ON DATATYPE CONVERSION
+            ret["attempts"].append(i)
 
         return ret
 
@@ -530,17 +538,54 @@ class Node:
             "build_info": response["build_info"]
         }
 
-    # unchecked
+    def unchecked(self, json_block, count):
+        response = self._request(
+            {"action": "unchecked", "json_block": json_block, "count": count})
+        ret = {}
+        for i in response["blocks"]:
+            ret[i] = {
+                "type": response["blocks"][i]["type"],
+                "account": response["blocks"][i]["account"],
+                "previous": response["blocks"][i]["previous"],
+                "representative": response["blocks"][i]["representative"],
+                "balance": int(response["blocks"][i]["balance"]),
+                "link": response["blocks"][i]["link"],
+                "link_as_account": response["blocks"][i]["link_as_account"],
+                "signature": response["blocks"][i]["signature"],
+                "work": response["blocks"][i]["work"]
+            }
+        return ret
 
     def unchecked_clear(self):
         response = self._request({"action": "unchecked_clear"})
         return response["success"]
 
-    # unchecked_get
-    # unchecked_keys
+    def unchecked_get(self, json_block, Hash):
+        response = self._request(
+            {"action": "unchecked_get", "json_block": json_block, "hash": Hash})
+        return {
+            "modified_timestamp": int(response["modified_timestamp"]),
+            "contents": {
+                "type": response["contents"]["type"],
+                "account": response["contents"]["account"],
+                "previous": response["contents"]["previous"],
+                "representative": response["contents"]["representative"],
+                "balance": int(response["contents"]["balance"]),
+                "link": response["contents"]["link"],
+                "link_as_account": response["contents"]["link_as_account"],
+                "signature": response["contents"]["signature"],
+                "work": response["contents"]["work"]
+            }
+        }
+
+    def unchecked_keys(self, json_block, key, count):
+        response = self._request(
+            {"action": "unchecked_keys", "json_block": json_block, "key": key, "count": count})
+        return response["unchecked"]
 
     def unopened(self, account, count):
-        response = self._request({"action": "unopened","account":account,"count":count})
+        response = self._request(
+            {"action": "unopened", "account": account, "count": count})
         ret = {}
         for i in response["accounts"]:
             ret[i] = int(response["accounts"][i])
@@ -577,7 +622,8 @@ class Node:
         return response["success"]
 
     def work_validate(self, work, Hash):
-        response = self._request({"action": "work_validate","work":work,"hash":Hash})
+        response = self._request(
+            {"action": "work_validate", "work": work, "hash": Hash})
         return {
             "valid_all": int(response["valid_all"]),
             "valid_receive": int(response["valid_receive"]),
