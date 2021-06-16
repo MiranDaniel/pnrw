@@ -3,6 +3,8 @@
 
 ***PNRW is a Python Wrapper for the Nano RPC protocol.***
 
+***PNRW supports Banano as well!***
+
 ---
 
 ![badge](https://img.shields.io/pypi/dm/pnrw?style=for-the-badge)
@@ -72,6 +74,14 @@ import pnrw
 node = pnrw.Node("mynano.ninja/api/node") # Create a new node instance
 ```
 
+#### Starting code for Banano
+
+```py
+import pnrw
+
+node = pnrw.Node("kaliumapi.appditto.com/api", banano=True) # Create a new node instance
+```
+
 #### Getting basic node information
 
 ```py
@@ -83,7 +93,7 @@ print(node.block_count()) # Check node block count
 print(node.version()["protocol_version"]) # Print protocol version of node
 print(node.uptime()) # Print node uptime in seconds
 ```
-<!-- markdownlint-restore -->
+
 #### Showing current account balance
 
 ```py
@@ -96,6 +106,17 @@ myBalance = node.rai_from_raw(balance["balance"]) # Convert from raw to Nano
 
 print(f"I currently have {myBalance} Nano!")
 ```
+
+#### Convert units
+
+```py
+from pnrw import convert
+
+print(convert.convert(123,"nano","knano")) # convert 123 Nano to kNano
+print(convert.convert(456,"ban","banoshi")) # convert 456 Banano to banoshi
+```
+
+<!-- markdownlint-restore -->
 
 ---
 

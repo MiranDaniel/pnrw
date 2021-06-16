@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='pnrw',
-    version='0.1.2',
+    version='0.1.4',
     description='Python Nanocurrency RPC Wrapper',
     long_description=long_description,
     long_description_content_type="text/markdown",

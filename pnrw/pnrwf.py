@@ -37,10 +37,13 @@ def _validate_ip(s):
 
 
 def _validate_address(s):
-    if s.startswith("nano_") == False and s.startswith("ban_") == False:
+    if s.startswith("nano_") == False and s.startswith("ban_") == False and s.startswith("xrb_") == False:
         raise AddressInvalid(s)
     else:
         if s.startswith("nano_"):
+            if len(s) != 65:
+                raise AddressInvalid(s)
+        if s.startswith("xrb_"):
             if len(s) != 65:
                 raise AddressInvalid(s)
         elif s.startswith("ban_"):
@@ -76,6 +79,9 @@ class Node:
         if headers == "Default":
             self.headers = {'Content-type': 'application/json', 'Accept': '*/*',
                             "Accept-Encoding": "gzip, deflate, br", "Connection": "keep-alive"}
+            if banano:
+                self.headers = {
+                    'Content-type': 'application/json', "Connection": "keep-alive"}
         else:
             self.headers = headers
 
@@ -270,8 +276,15 @@ class Node:
             "subtype": response["subtype"],
         }
 
-    # blocks
-    # blocks_info
+    def blocks_info(self, json_block, hashes):
+        response = self._request(
+            {"action": "blocks_info", "json_block": json_block, "hashes": hashes})
+        return response["blocks"]
+
+    def blocks(self, json_block, hashes):
+        response = self._request(
+            {"action": "blocks", "json_block": json_block, "hashes": hashes})
+        return response["blocks"]
 
     def bootstrap(self, address, port):
         response = self._request(
@@ -305,7 +318,7 @@ class Node:
             "attempts": []
         }
         for i in response["attempts"]:
-            ret["attempts"].append(i)  # WORK ON DATATYPE CONVERSION
+            ret["attempts"].append(i)
 
         return ret
 
@@ -525,15 +538,58 @@ class Node:
             "build_info": response["build_info"]
         }
 
-    # unchecked
+    def unchecked(self, json_block, count):
+        response = self._request(
+            {"action": "unchecked", "json_block": json_block, "count": count})
+        ret = {}
+        for i in response["blocks"]:
+            ret[i] = {
+                "type": response["blocks"][i]["type"],
+                "account": response["blocks"][i]["account"],
+                "previous": response["blocks"][i]["previous"],
+                "representative": response["blocks"][i]["representative"],
+                "balance": int(response["blocks"][i]["balance"]),
+                "link": response["blocks"][i]["link"],
+                "link_as_account": response["blocks"][i]["link_as_account"],
+                "signature": response["blocks"][i]["signature"],
+                "work": response["blocks"][i]["work"]
+            }
+        return ret
 
     def unchecked_clear(self):
         response = self._request({"action": "unchecked_clear"})
         return response["success"]
 
-    # unchecked_get
-    # unchecked_keys
-    # unopened
+    def unchecked_get(self, json_block, Hash):
+        response = self._request(
+            {"action": "unchecked_get", "json_block": json_block, "hash": Hash})
+        return {
+            "modified_timestamp": int(response["modified_timestamp"]),
+            "contents": {
+                "type": response["contents"]["type"],
+                "account": response["contents"]["account"],
+                "previous": response["contents"]["previous"],
+                "representative": response["contents"]["representative"],
+                "balance": int(response["contents"]["balance"]),
+                "link": response["contents"]["link"],
+                "link_as_account": response["contents"]["link_as_account"],
+                "signature": response["contents"]["signature"],
+                "work": response["contents"]["work"]
+            }
+        }
+
+    def unchecked_keys(self, json_block, key, count):
+        response = self._request(
+            {"action": "unchecked_keys", "json_block": json_block, "key": key, "count": count})
+        return response["unchecked"]
+
+    def unopened(self, account, count):
+        response = self._request(
+            {"action": "unopened", "account": account, "count": count})
+        ret = {}
+        for i in response["accounts"]:
+            ret[i] = int(response["accounts"][i])
+        return ret
 
     def uptime(self):
         response = self._request({"action": "uptime"})
@@ -543,7 +599,14 @@ class Node:
         response = self._request({"action": "work_cancel", "hash": Hash})
         return response
 
-    # work_generate
+    def work_generate(self, Hash):
+        response = self._request({"action": "work_generate", "hash": Hash})
+        return {
+            "work": response["work"],
+            "difficulty": response["difficulty"],
+            "multiplier": float(response["multiplier"]),
+            "hash": response["hash"]
+        }
 
     def work_peer_add(self, address, port):
         response = self._request(
@@ -558,7 +621,15 @@ class Node:
         response = self._request({"action": "work_peer_add"})
         return response["success"]
 
-    # work validate
+    def work_validate(self, work, Hash):
+        response = self._request(
+            {"action": "work_validate", "work": work, "hash": Hash})
+        return {
+            "valid_all": int(response["valid_all"]),
+            "valid_receive": int(response["valid_receive"]),
+            "difficulty": response["difficulty"],
+            "multiplier": float(response["multiplier"])
+        }
 
     def account_create(self, wallet):
         response = self._request(
@@ -681,7 +752,10 @@ class Node:
             {"action": "wallet_destroy", "wallet": wallet})
         return int(response["destroyed"])
 
-    # wallet_export
+    def wallet_export(self, wallet):
+        response = self._request(
+            {"action": "wallet_export", "wallet": wallet})
+        return json.loads(response["json"])
 
     def wallet_frontiers(self, wallet):
         response = self._request(
